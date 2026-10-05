@@ -1,0 +1,52 @@
+# Autosave and backup files
+*.asv
+*.m~
+*.autosave
+*.slx.autosave
+*.mlx.autosave
+
+# Compiled MEX files
+*.mex*
+*.mexa64
+*.mexmaca64
+*.mexmaci64
+*.mexw64
+*.mexw32
+
+# Code generation output
+codegen/
+slprj/
+*_ert_rtw/
+*_grt_rtw/
+*_sfun.*
+*.slxc
+
+# Simulink cache and generated files
+*.slxc
+*.sldd.bak
+.SimulinkProject/
+
+# MATLAB Compiler / packaging output
+*.prj.bak
+*.mltbx
+*.ctf
+*.exe
+readme.txt
+mccExcludedFiles.log
+requiredMCRProducts.txt
+unresolvedSymbols.txt
+
+# Profiler / coverage / publish output
+html/
+*.log
+
+# Large data and results (adjustable)
+# *.mat
+# results/
+# data/raw/
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
