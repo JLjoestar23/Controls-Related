@@ -7,7 +7,7 @@ function single_pendulum_anim(X, t, tspan, system_params)
     y = -l*cos(X(:,1));
     
     % figure setup
-    fig = figure('Name','Single Pendulum');
+    fig = figure('Name', 'Single Pendulum', 'color', 'w');
     
     % left panel: animation
     ax1 = subplot(1,2,1,'Parent',fig);
@@ -73,17 +73,10 @@ function single_pendulum_anim(X, t, tspan, system_params)
     
     trail_x = nan(1, trail_len);
     trail_y = nan(1, trail_len);
-    
+
     tic;
     for k = 1:length(t_frames)
 
-        % keep real-time pacing
-        elapsed = toc;
-        target  = t_frames(k);
-        if elapsed < target
-            pause(target - elapsed);
-        end
-    
         % update trail
         idx = mod(k-1, trail_len) + 1;
         trail_x(idx) = xf(k);
@@ -98,16 +91,27 @@ function single_pendulum_anim(X, t, tspan, system_params)
             ty = trail_y(order);
         end
     
-        set(h_trail, 'XData', tx, 'YData', ty);
-        set(h_rod,  'XData', [0, xf(k)],       'YData', [0, yf(k)]);
-        set(h_m,    'XData', xf(k), 'YData', yf(k));
+        set(h_trail, 'XData', tx,         'YData', ty);
+        set(h_rod,   'XData', [0, xf(k)], 'YData', [0, yf(k)]);
+        set(h_m,     'XData', xf(k),      'YData', yf(k));
         set(h_time,  'String', sprintf('t = %.2f s', t_frames(k)));
-    
-        % addpoints(h_p1plot, t_frames(k), phi1f(k));
-        % addpoints(h_p2plot, t_frames(k), phi2f(k));
         addpoints(pp, thetaf(k), dthetaf(k));
     
         drawnow limitrate;
+    
+        % pause after first frame is drawn, then reset clock for smooth pacing
+        if k == 1
+            pause(1);
+            tic;   % reset clock so pacing starts from frame 2 correctly
+            continue;
+        end
+    
+        % real-time pacing for remaining frames
+        elapsed = toc;
+        target  = t_frames(k) - t_frames(2);   % offset since tic was reset at frame 2
+        if elapsed < target
+            pause(target - elapsed);
+        end
     
         if ~ishandle(fig), break; end
 

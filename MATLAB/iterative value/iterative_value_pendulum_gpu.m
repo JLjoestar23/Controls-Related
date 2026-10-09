@@ -178,6 +178,7 @@ hold off;
 % plot optimal control policy based on state
 opt_control_idx_matrix = reshape(opt_control, [n_theta, n_dtheta]);
 u_opt_matrix = u(opt_control_idx_matrix);
+% u_opt_matrix = interp2(u_opt_matrix, 2);
 
 subplot(1, 2, 2);
 imagesc(theta_bins, dtheta_bins, u_opt_matrix');
@@ -235,7 +236,7 @@ function C = cost_vec(X, u, goal, tol_goal)
     C(check_goal(X, goal, tol_goal)) = 0;
 end
 
-% --- GPU-safe replacements for Mapping-Toolbox wrap functions & interp1 ---
+% GPU-safe replacements for Mapping-Toolbox wrap functions & interp1
 % (elementwise arithmetic — supported for both plain doubles and gpuArray,
 % no toolbox dependency, and faster than interp1/wrapToPi even on CPU)
 
