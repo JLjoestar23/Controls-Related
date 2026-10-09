@@ -6,7 +6,7 @@ function quadratic_min_effort_fixed_time()
     xf = [0; 0];
     nx = 2; nu = 1;
 
-    % --- Step 1: find minimum-time N via feasibility bisection (unchanged) ---
+    % find minimum-time N via feasibility bisection (unchanged)
     N_lo = 2; N_hi = 1000;
     while N_hi - N_lo > 1
         N_mid = floor((N_lo + N_hi)/2);
@@ -19,7 +19,7 @@ function quadratic_min_effort_fixed_time()
     N_min = N_hi;
     fprintf('N_min = %d, t_f = %.4f s\n', N_min, (N_min-1)*dt);
 
-    % --- Step 2: re-solve at (N_min) as a QP, minimizing effort ---
+    % re-solve at (N_min) as a QP, minimizing effort
     N = N_min;
     [x_sol, u_sol] = solve_quadprog(N, Ad, Bd, x0, xf);
 
