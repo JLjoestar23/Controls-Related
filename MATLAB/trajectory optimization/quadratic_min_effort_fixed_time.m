@@ -51,8 +51,9 @@ end
 function [x_sol, u_sol] = solve_quadprog(N, A, B, x0, xf)
     [Aeq, beq, lb, ub, nVars, nX, nu] = build_constraints(N, A, B, x0, xf);
 
-    H = zeros(nVars);
-    H(nX+1:end, nX+1:end) = 2*eye(nVars - nX);   % quadprog uses (1/2)x'Hx, so 2*I gives sum(u.^2)
+    % H = zeros(nVars);
+    % H(nX+1:end, nX+1:end) = 2*eye(nVars - nX);   % quadprog uses (1/2)x'Hx, so 2*I gives sum(u.^2)
+    H = 2*eye(nVars);
     fcost = zeros(nVars,1);
 
     opts = optimoptions('quadprog', 'Display', 'none');
