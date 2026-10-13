@@ -25,6 +25,9 @@ Bd = Ts * [0; 1];
 N = 284;
 nX = size(Ad, 1);
 nU = size(Bd, 2);
+nD = nX*N+nU*(N-1);
+nG = nX+nU;
+
 x0 = [-2; 0];
 xf = [0; 0];
 
@@ -35,6 +38,25 @@ xf = [0; 0];
 opts = optimoptions('quadprog', 'Display', 'none');
 z = quadprog(H, f, [], [], Aeq, beq, lb, ub, [], opts);
 
+initial_reshape = reshape([z; zeros(nU, 1)], nG, N);
+X_sol = initial_reshape(1:nX, :);
+U_sol = initial_reshape(nX+1:end, 1:N-1);
+
+t_X = (0:N-1)*Ts;
+t_U = (0:N-2)*Ts;
+
+figure;
+subplot(3,1,1);
+plot(X_sol(1,:), X_sol(2,:), 'MarkerSize', 2);
+xlabel('q'); ylabel('qdot'); title('Phase Portrait'); grid on;
+
+subplot(3,1,2);
+plot(t_X, X_sol(1,:), t_X, X_sol(2,:));
+xlabel('t (s)'); ylabel('state'); legend('q','qdot'); grid on;
+
+subplot(3,1,3);
+plot(t_U, U_sol, 'LineWidth', 1.2);
+xlabel('t (s)'); ylabel('u'); grid on;
 
 %% Functions
 
@@ -48,10 +70,11 @@ function [Aeq, beq, lb, ub] = build_constraints(N, nX, nU, A, B, x0, xf)
     % x0; % system ICs
 
     nD = nX*N + nU*(N-1); % total number of decision variables
+    nG = nX+nU; % number of decision variables per "group"
     
     % initialize equality constraint matrix and vector
-    Aeq = zeros(nX+nX*N, nD);
-    beq = zeros(nX+nX*N, 1);
+    Aeq = zeros(nG*N, nD);
+    beq = zeros(nG*N, 1);
     
     % setup for system initial conditions
     Aeq(1:nX, 1:nX) = eye(2);
@@ -60,10 +83,9 @@ function [Aeq, beq, lb, ub] = build_constraints(N, nX, nU, A, B, x0, xf)
     % dynamics equality constraints: x[k+1] = Ax[k] + Bu[k]
     for k=1:N-1
         row = nX + (k-1)*nX + (1:nX);
-        x_col = (k-1)*(nX+nU) + (1:nX);
-        x_next_col = k*(nX+nU) + (1:nX);
+        x_col = (k-1)*nG + (1:nX);
+        x_next_col = k*nG + (1:nX);
         u_col = x_col(end) + (1:nU);
-
         Aeq(row, x_col) = -A;
         Aeq(row, x_next_col) = eye(2);
         Aeq(row, u_col) = -B;
@@ -86,7 +108,8 @@ end
 
 function [H, f] = build_cost(N, nX, nU, cost_type)
     if strcmpi(cost_type, 'quadratic')
-        H = 2*eye(N*(nX+nU));
-        f = zeros(N*(nX+nU), 1);
+        nD = nX*N+nU*(N-1);
+        H = 2*eye(nD);
+        f = zeros(nD, 1);
     end
 end
