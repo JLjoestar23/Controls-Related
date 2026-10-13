@@ -4,7 +4,6 @@
 
 %% Establish System Dynamics
 
-
 % continuous time dynamics
 A = [0 1; 0 0];
 B = [0; 1];
@@ -22,43 +21,60 @@ Ad = eye(2) + Ts * [0, 1; 0, 0];
 Bd = Ts * [0; 1];
 
 % Problem dimensions and boundary conditions
-N = 284;
-nX = size(Ad, 1);
-nU = size(Bd, 2);
-nD = nX*N+nU*(N-1);
-nG = nX+nU;
+N = 300;
+% nX = size(Ad, 1);
+% nU = size(Bd, 2);
+% nD = nX*N+nU*(N-1);
+% nG = nX+nU;
 
-x0 = [-2; 0];
+x0 = [-2; 1];
 xf = [0; 0];
 
-[Aeq, beq, lb, ub] = build_constraints(N, nX, nU, Ad, Bd, x0, xf);
-
-[H, f] = build_cost(N, nX, nU, 'quadratic');
-
-opts = optimoptions('quadprog', 'Display', 'none');
-z = quadprog(H, f, [], [], Aeq, beq, lb, ub, [], opts);
-
-initial_reshape = reshape([z; zeros(nU, 1)], nG, N);
-X_sol = initial_reshape(1:nX, :);
-U_sol = initial_reshape(nX+1:end, 1:N-1);
+[X_sol, U_sol] = solve_quad_prog(N, Ad, Bd, x0, xf);
 
 t_X = (0:N-1)*Ts;
 t_U = (0:N-2)*Ts;
 
 figure;
-subplot(3,1,1);
-plot(X_sol(1,:), X_sol(2,:), 'MarkerSize', 2);
-xlabel('q'); ylabel('qdot'); title('Phase Portrait'); grid on;
+plot(X_sol(1,:), X_sol(2,:), 'LineWidth', 2);
+xlabel('x'); ylabel('xdot');
+axis square; axis equal;
+grid on; grid minor;
+title('Phase Portrait');
 
-subplot(3,1,2);
-plot(t_X, X_sol(1,:), t_X, X_sol(2,:));
-xlabel('t (s)'); ylabel('state'); legend('q','qdot'); grid on;
+figure;
+subplot(2,1,1);
+plot(t_X, X_sol(1,:), t_X, X_sol(2,:), 'LineWidth', 2);
+xlabel('t (s)'); ylabel('state');
+grid on;
+legend('x','xdot');
+title('Optimal State and Input Trajectories');
 
-subplot(3,1,3);
-plot(t_U, U_sol, 'LineWidth', 1.2);
-xlabel('t (s)'); ylabel('u'); grid on;
+subplot(2,1,2);
+plot(t_U, U_sol, 'LineWidth', 2);
+xlabel('t (s)'); ylabel('u');
+grid on;
 
 %% Functions
+
+function [X_sol, U_sol] = solve_quad_prog(N, A, B, x0, xf)
+
+    nX = size(A, 1);
+    nU = size(B, 2);
+    nD = nX*N+nU*(N-1);
+    nG = nX+nU;
+    
+    [Aeq, beq, lb, ub] = build_constraints(N, nX, nU, A, B, x0, xf);
+    
+    [H, f] = build_cost(N, nX, nU, 'quadratic');
+
+    opts = optimoptions('quadprog', 'Display', 'none');
+    z = quadprog(H, f, [], [], Aeq, beq, lb, ub, [], opts);
+    
+    initial_reshape = reshape([z; zeros(nU, 1)], nG, N);
+    X_sol = initial_reshape(1:nX, :);
+    U_sol = initial_reshape(nX+1:end, 1:N-1);
+end
 
 function [Aeq, beq, lb, ub] = build_constraints(N, nX, nU, A, B, x0, xf)
     % N; % number of discrete timesteps
