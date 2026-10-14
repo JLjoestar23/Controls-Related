@@ -8,7 +8,7 @@ function [Aeq, beq, lb, ub] = build_constraints(N, nX, nU, A, B, x0, xf)
     % x0; % system ICs
 
     nD = nX*N + nU*(N-1); % total number of decision variables
-    nG = nX+nU; % number of decision variables per "group"
+    nG = nX+nU; % number of decision variables per timestep
     
     % initialize equality constraint matrix and vector
     Aeq = zeros(nG*N, nD);
@@ -40,6 +40,7 @@ function [Aeq, beq, lb, ub] = build_constraints(N, nX, nU, A, B, x0, xf)
     % define bounded input
     for k = 1:N-1
         u_idx = (k-1)*(nX+nU) + nX + (1:nU);
-        lb(u_idx) = -1;  ub(u_idx) = 1;
+        lb(u_idx) = -1;
+        ub(u_idx) = 1;
     end
 end
