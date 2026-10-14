@@ -1,4 +1,4 @@
-function [X_sol, U_sol, fval, exitflag, output] = solve_quadprog(N, A, B, x0, xf)
+function [X_sol, U_sol, fval, exitflag, output] = solve_quadprog(N, A, B, x0, xf, cost_type)
 
     nX = size(A, 1);
     nU = size(B, 2);
@@ -7,7 +7,7 @@ function [X_sol, U_sol, fval, exitflag, output] = solve_quadprog(N, A, B, x0, xf
     
     [Aeq, beq, lb, ub] = build_constraints(N, nX, nU, A, B, x0, xf);
     
-    [H, f] = build_cost(N, nX, nU, 'quadratic');
+    [H, f] = build_cost(N, nX, nU, cost_type);
 
     opts = optimoptions('quadprog', 'Display', 'none');
     [z, fval, exitflag, output] = quadprog(H, f, [], [], Aeq, beq, lb, ub, [], opts);
